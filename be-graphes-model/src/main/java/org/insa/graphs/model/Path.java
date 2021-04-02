@@ -202,7 +202,34 @@ public class Path {
      */
     public boolean isValid() {
         // TODO:
-        return false;
+    	boolean valid = false;
+    	if(this.isEmpty()) {
+    		valid = true;
+    		return valid;
+    	}
+    	
+    	//it contains a single node(without arcs)
+    	if((this.size()==1)&&(this.arcs.size()==0)){
+    		valid = true;
+    		return valid;
+    	}
+    	
+    	//the first arc has for origin the origin of the path and, for two
+        //consecutive arcs, the destination of the first one is the origin of the
+        //second one.
+    	if ((arcs.get(0)).getOrigin()==this.getOrigin()) {
+    		valid = true;
+    	}
+    	
+    	int i=0;
+    	while(valid && i<(arcs.size()-2)){
+    		if((arcs.get(i)).getDestination()!=(arcs.get(i+1)).getOrigin()) {
+    			valid = false;
+    		}
+    		i+=1;
+    	}
+    	
+        return valid;
     }
 
     /**
