@@ -214,7 +214,12 @@ public class Path {
      */
     public float getLength() {
         // TODO:
-        return 0;
+    	float length = 0;
+    	for(Arc arc : this.arcs) {
+    		length+=arc.getLength();
+    	}
+    	
+        return length;
     }
 
     /**
