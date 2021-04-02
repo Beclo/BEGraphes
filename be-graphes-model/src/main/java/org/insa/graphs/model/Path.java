@@ -247,7 +247,11 @@ public class Path {
      */
     public double getMinimumTravelTime() {
         // TODO:
-        return 0;
+    	double time = 0;
+    	for(Arc etape : this.arcs) {
+    		time += etape.getMinimumTravelTime();
+    	}
+    	return time;
     }
 
 }
