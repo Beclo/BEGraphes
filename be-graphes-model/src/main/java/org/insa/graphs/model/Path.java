@@ -216,7 +216,7 @@ public class Path {
         // TODO:
     	float length = 0;
     	for(Arc arc : this.arcs) {
-    		length+=arc.getLength();
+    		length+=arc.getLength(); //on obtient longueur d'un arc
     	}
     	
         return length;
@@ -234,7 +234,7 @@ public class Path {
      */
     public double getTravelTime(double speed) {
         // TODO:
-        return 0;
+        return this.getLength()/(speed*(1/3.6)); //On convertit la vitesse en m/s
     }
 
     /**
