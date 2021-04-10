@@ -35,7 +35,36 @@ public class Path {
     public static Path createFastestPathFromNodes(Graph graph, List<Node> nodes)
             throws IllegalArgumentException {
         List<Arc> arcs = new ArrayList<Arc>();
+        boolean valid = false;
+        
         // TODO:
+        if (nodes.size()==0) {
+        	return new Path(graph);
+        }else if (nodes.size()==1) {
+        	return new Path(graph,nodes.get(0));
+        }
+        
+        for (int i=0;i<nodes.size()-1;i++) {
+        	List<Arc> successors = nodes.get(i).getSuccessors();
+        	Arc arcmin = successors.get(0);
+        	valid =false;
+        	
+        	for (Arc arc : successors) {
+        		if(arc.getDestination()==nodes.get(i+1)) {
+        			valid = true;
+        			if(arcmin.getMinimumTravelTime()>arc.getMinimumTravelTime()) {
+        				arcmin = arc;
+        			}
+        			
+        		}
+        	}
+        	
+	        if(!valid) {
+	        	throw new IllegalArgumentException();
+	        }
+	      	arcs.add(arcmin);
+	      	
+        }
         return new Path(graph, arcs);
     }
 
@@ -56,7 +85,37 @@ public class Path {
     public static Path createShortestPathFromNodes(Graph graph, List<Node> nodes)
             throws IllegalArgumentException {
         List<Arc> arcs = new ArrayList<Arc>();
+        boolean valid = false;
+        
         // TODO:
+        if (nodes.size()==0) {
+        	return new Path(graph);
+        }else if (nodes.size()==1) {
+        	return new Path(graph,nodes.get(0));
+        }
+        
+        for (int i=0;i<nodes.size()-1;i++) {
+        	List<Arc> successors = nodes.get(i).getSuccessors();
+        	Arc arcmin = successors.get(0);
+        	valid =false;
+        	
+        	for (Arc arc : successors) {
+        		if(arc.getDestination()==nodes.get(i+1)) {
+        			valid = true;
+        			if(arcmin.getLength()>arc.getLength()) {
+        				arcmin = arc;
+        			}
+        			
+        		}
+        	}
+        	
+	        if(!valid) {
+	        	throw new IllegalArgumentException();
+	        }
+	      	arcs.add(arcmin);
+	      	
+        }
+        
         return new Path(graph, arcs);
     }
 
