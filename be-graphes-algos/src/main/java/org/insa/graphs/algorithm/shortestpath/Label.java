@@ -44,7 +44,7 @@ public class Label implements Comparable<Label>{
 		this.father=father;
 	}
 	
-
+	@Override
 	public int compareTo(Label arg2) {
 		return Double.compare(this.cost, arg2.cost);
 	}
