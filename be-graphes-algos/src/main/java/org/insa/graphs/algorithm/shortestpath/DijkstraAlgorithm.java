@@ -1,5 +1,6 @@
 package org.insa.graphs.algorithm.shortestpath;
 
+import org.insa.graphs.algorithm.AbstractInputData;
 import org.insa.graphs.algorithm.AbstractSolution.Status;
 import org.insa.graphs.algorithm.utils.BinaryHeap;
 import org.insa.graphs.algorithm.utils.ElementNotFoundException;
@@ -85,6 +86,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         			double oldCost = label[IdNextNode].getCost();
         			double newCost = label[currentNode.getIDCurrentNode()].getCost()+w;
         			
+        			//Notify all observers that a node has been reached for the first time.
         			if(Double.isInfinite(oldCost) && Double.isFinite(newCost)) {
         				notifyNodeReached(successor.getDestination());
         			}
@@ -94,6 +96,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         			if(oldCost>newCost) {
         				label[IdNextNode].setCost(newCost);
         				label[IdNextNode].setFather(currentNode.getIDCurrentNode());
+        				
         				//remove it from the heap if already exists
         				//if not, insert it
         				try {
@@ -137,7 +140,17 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	        Collections.reverse(nodes);
 	        
 	        //Creation of the final solution
-	        Path finalPath = Path.createShortestPathFromNodes(graph, nodes);
+	        Path finalPath;
+	        
+	        //Different modes
+	        if(data.getMode().equals(AbstractInputData.Mode.LENGTH)) {
+	        	//Solution according to length of the path
+	        	finalPath = Path.createShortestPathFromNodes(graph, nodes);
+	        }else {
+	        	//Solution according to speed of the path
+	        	finalPath = Path.createFastestPathFromNodes(graph, nodes);
+	        }
+	        
 	        solution = new ShortestPathSolution(data,Status.OPTIMAL,finalPath);
         }
         
