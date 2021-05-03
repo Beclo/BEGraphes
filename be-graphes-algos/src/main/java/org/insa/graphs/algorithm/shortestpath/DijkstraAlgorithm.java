@@ -40,8 +40,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         BinaryHeap<Label> heap = new BinaryHeap<>();
         heap.insert(label[origin]);
         
-        /*//Notify all observers that the origin has been processed
-        notifyOriginProcessed(data.getOrigin());*/
+        //Notify all observers that the origin has been processed
+        notifyOriginProcessed(data.getOrigin());
         
         /* ITERATIONS */
         //While il existe des sommets non marqués
@@ -58,22 +58,18 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         //	end for
         //end while
         
-        while(!label[data.getDestination().getId()].getMarque()) {
+        while(!label[data.getDestination().getId()].getMarque()&&!heap.isEmpty()) {
         	Label currentNode;
         	
         	//Extract Min
         	try {
-        		currentNode = heap.findMin();
+        		currentNode = heap.deleteMin();
         	}catch(EmptyPriorityQueueException e) {
         		break;
         	}
         	
-        	//Mark
+           	//Mark
         	label[currentNode.getIDCurrentNode()].setMarque(true);
-        	
-        	try {
-        		heap.remove(currentNode);
-        	}catch(ElementNotFoundException e) {}
         	
         	for(Arc successor : graph.get(currentNode.getIDCurrentNode()).getSuccessors()) {
         		
@@ -89,16 +85,15 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         			double oldCost = label[IdNextNode].getCost();
         			double newCost = label[currentNode.getIDCurrentNode()].getCost()+w;
         			
-        			/*if(Double.isInfinite(oldCost) && Double.isFinite(newCost)) {
+        			if(Double.isInfinite(oldCost) && Double.isFinite(newCost)) {
         				notifyNodeReached(successor.getDestination());
-        			}*/
+        			}
         			
         		//Test if the new cost is smaller than the old cost.
         		//If so, the cost of the successor is updated
         			if(oldCost>newCost) {
         				label[IdNextNode].setCost(newCost);
         				label[IdNextNode].setFather(currentNode.getIDCurrentNode());
-        				
         				//remove it from the heap if already exists
         				//if not, insert it
         				try {
@@ -115,6 +110,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
      
         }
         
+        
         /* SOLUTION */
         ShortestPathSolution solution = null;
         
@@ -126,6 +122,9 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	        ArrayList<Node> nodes = new ArrayList<Node>();
 	        nodes.add(data.getDestination());
 	        Node current = data.getDestination();
+	        
+	        // The destination has been found, notify the observers.
+            notifyDestinationReached(data.getDestination());
 	        
 	        //Find the nodes and add them to the ArrayList
 	        while(!current.equals(data.getOrigin())) {
