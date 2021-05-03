@@ -148,13 +148,12 @@ public class BinaryHeap<E extends Comparable<E>> implements PriorityQueue<E> {
     		throw new ElementNotFoundException(x);	
     	}
     	else {
-    		E lastelem = array.get(array.size()-1); //value of the last element
+    		E lastelem = array.get(this.currentSize-1); //value of the last element
     		this.arraySet(index, lastelem); //switch last element with the element to be removed
-    		array.remove(array.size()-1); //last element is removed
     		
     		this.currentSize--; //decrease the size
     		
-    		if(index > 0 && lastelem.compareTo(array.get(indexParent(index))) < 0) {
+    		if(index != 0 && lastelem.compareTo(array.get(indexParent(index))) < 0) {
     			percolateUp(index);
     		}else {
     			percolateDown(index);
