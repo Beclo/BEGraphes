@@ -45,15 +45,19 @@ public class Path {
         }
         
         for (int i=0;i<nodes.size()-1;i++) {
-        	List<Arc> successors = nodes.get(i).getSuccessors();
-        	Arc arcmin = successors.get(0);
+        	Node node = graph.get(nodes.get(i).getId());
+        	List<Arc> successors = node.getSuccessors();
+        	Arc arcmin = null;
+        	double timemin = Double.MAX_VALUE;
         	valid =false;
         	
+        	
         	for (Arc arc : successors) {
-        		if(arc.getDestination()==nodes.get(i+1)) {
+        		if(arc.getDestination().equals(nodes.get(i+1))) {
         			valid = true;
-        			if(arcmin.getMinimumTravelTime()>arc.getMinimumTravelTime()) {
+        			if(arc.getMinimumTravelTime()<timemin) {
         				arcmin = arc;
+        				timemin = arc.getMinimumTravelTime();
         			}
         			
         		}
