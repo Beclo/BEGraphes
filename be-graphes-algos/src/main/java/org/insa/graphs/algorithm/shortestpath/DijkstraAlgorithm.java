@@ -16,6 +16,14 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
     public DijkstraAlgorithm(ShortestPathData data) {
         super(data);
     }
+    
+    
+    Label[] label = new Label[data.getGraph().size()];
+    public void setLabel(ShortestPathData data){
+    	for (int i=0; i<data.getGraph().size(); i++) {
+    		label[i]=new Label(i,false,Double.POSITIVE_INFINITY,-1);
+    	}
+    }
 
     @Override
     protected ShortestPathSolution doRun() {
@@ -26,11 +34,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         
         /* INITIALIZATION */
         //Associate label to each node
-        final int nbNodes = graph.size();
-        Label[] label = new Label[nbNodes];
-        for (int i=0; i<nbNodes; i++) {
-        	label[i]=new Label(i,false,Double.POSITIVE_INFINITY,-1);
-        }
+        	//final int nbNodes = graph.size();
+        setLabel(data);
         
         //Initialization of the origin (cost=0)
         int origin = data.getOrigin().getId();
@@ -72,7 +77,13 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
            	//Mark
         	label[currentNode.getIDCurrentNode()].setMarque(true);
         	
+        	//System.out.println("Coût :"+label[currentNode.getIDCurrentNode()].getCost());
+        	
+        	//int successorswatch =0;
+        	
         	for(Arc successor : graph.get(currentNode.getIDCurrentNode()).getSuccessors()) {
+        		
+        		//successorswatch +=1;
         		
         		//Verify if the arc is allowed
         		if (!data.isAllowed(successor)) {
@@ -110,6 +121,10 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         		}
         		
         	}
+        	
+        	//int nb_successors = graph.get(currentNode.getIDCurrentNode()).getNumberOfSuccessors();
+        	//System.out.println("Nombre de successeurs : "+nb_successors);
+            //System.out.println("Nombre de successeurs comptés :"+ successorswatch);
      
         }
         
