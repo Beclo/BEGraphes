@@ -5,9 +5,13 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.insa.graphs.algorithm.AbstractSolution;
 import org.insa.graphs.algorithm.ArcInspectorFactory;
+import org.insa.graphs.algorithm.weakconnectivity.WeaklyConnectedComponentsAlgorithm;
+import org.insa.graphs.algorithm.weakconnectivity.WeaklyConnectedComponentsData;
+import org.insa.graphs.algorithm.weakconnectivity.WeaklyConnectedComponentsSolution;
 import org.insa.graphs.model.Graph;
 import org.insa.graphs.model.Node;
 import org.insa.graphs.model.Path;
@@ -34,10 +38,12 @@ public class ShortestPathTest {
     
     // Variables to construct solutions for the tests
     private static ShortestPathSolution infeasibleDijkstra, onenodeDijkstraHG, onenodeDijkstraC;
-
+    private static ShortestPathSolution infeasibleAStar, onenodeAStarHG, onenodeAStarC;
+    
     // Array of solutions
     private static ShortestPathSolution[] Dijkstrasolutions;
     private static ShortestPathSolution[] Bellmansolutions;
+    private static ShortestPathSolution[] AStarsolutions;
     
 	@BeforeClass
 	public static void initAll() throws IOException {
@@ -74,6 +80,10 @@ public class ShortestPathTest {
 		DijkstraAlgorithm infeasibleDijkstraAlgo = new DijkstraAlgorithm(infeasibleData);
 		infeasibleDijkstra = infeasibleDijkstraAlgo.doRun();
 		
+		//// A* ////
+		AStarAlgorithm infeasibleAStarAlgo = new AStarAlgorithm(infeasibleData);
+		infeasibleAStar = infeasibleAStarAlgo.doRun();
+		
 		
 		////////// ONE NODE path //////////
 		
@@ -95,22 +105,62 @@ public class ShortestPathTest {
 		onenodeDijkstraHG = onenodeDijkstraAlgoHG.doRun();
 		onenodeDijkstraC = onenodeDijkstraAlgoC.doRun();
 		
+		//// AStar ////
+			// Mode Length
+		AStarAlgorithm onenodeAStarAlgoHG = new AStarAlgorithm(onenodeDataHG);
+		AStarAlgorithm onenodeAStarAlgoC = new AStarAlgorithm(onenodeDataC);
+		onenodeAStarHG = onenodeAStarAlgoHG.doRun();
+		onenodeAStarC = onenodeAStarAlgoC.doRun();
 		
 		////////// RANDOM path //////////
+		
 		// Construction of solutions : random pair origin/destination
 		
-		Dijkstrasolutions = new ShortestPathSolution[50];
-		Bellmansolutions = new ShortestPathSolution[50];
+		Dijkstrasolutions = new ShortestPathSolution[5];
+		Bellmansolutions = new ShortestPathSolution[5];
+		AStarsolutions = new ShortestPathSolution[5];
 		
 		int ite = 0;
-		while(ite<50) {
-			boolean valid = true;
+		while(ite<5) {
+			//boolean valid = true;
+			boolean originOK = false;
+			boolean destinationOK = false;
 			
+			// Random Nodes
+			Random randomnodes = new Random();
+			Node origin = nodesHauteGaronne.get(randomnodes.nextInt(graphHauteGaronne.size()));
+			Node destination = nodesHauteGaronne.get(randomnodes.nextInt(graphHauteGaronne.size()));
 			
+			// Verify if the path is feasible and if origin!=destination
+			WeaklyConnectedComponentsData componentData = new WeaklyConnectedComponentsData(graphHauteGaronne);
+			WeaklyConnectedComponentsAlgorithm componentAlgo = new WeaklyConnectedComponentsAlgorithm(componentData);
+			WeaklyConnectedComponentsSolution componentSolution = componentAlgo.run();
+			ArrayList<ArrayList<Node>> components = componentSolution.getComponents();
+			int numcomponent = -1;
 			
-			if(valid) {
+			if(!(origin.equals(destination))) {
+				for(int i=0;i<components.size();i++) {
+					for(int j=0;j<components.get(i).size();j++) {
+						if(origin.equals(components.get(i).get(j))) {
+							originOK=true;
+							numcomponent = i;
+							System.out.println("Origine :"+origin.getId());
+						}
+					}
+				}
 				
-				ShortestPathData randomData = new ShortestPathData(graphHauteGaronne,onenodeHG,onenodeHG,ArcInspectorFactory.getAllFilters().get(0));
+				if(originOK) {
+					for(int j=0;j<components.get(numcomponent).size();j++) {
+						if(destination.equals(components.get(numcomponent).get(j))) {
+							destinationOK=true;
+							System.out.println("Destination :"+destination.getId());
+						}
+					}
+				}
+			}
+			
+			if((originOK)&&(destinationOK)) {
+				ShortestPathData randomData = new ShortestPathData(graphHauteGaronne,origin,destination,ArcInspectorFactory.getAllFilters().get(0));
 				
 				//// Dijkstra ////
 					// Road map Haute-Garonne
@@ -126,21 +176,39 @@ public class ShortestPathTest {
 				BellmanFordAlgorithm randomBellmanAlgo = new BellmanFordAlgorithm(randomData);
 				Bellmansolutions[ite] = randomBellmanAlgo.doRun();
 				
+				//// A* ////
+					// Road map Haute-Garonne
+					// Mode Length
+				AStarAlgorithm randomAStarAlgo = new AStarAlgorithm(randomData);
+				AStarsolutions[ite] = randomAStarAlgo.doRun();
+				
 				ite++;
 			}
 			
 		}
 		
 		
+		////////// LONG path //////////
+		
+		
+		
 	}
 	
 	//////// TESTS ////////
 	
+	// Tests INFEASIBLE //
 	@Test
 	public void testInfeasiblePathDijkstra() {
 		assertEquals(AbstractSolution.Status.INFEASIBLE,infeasibleDijkstra.getStatus());
 	}
 	
+	@Test
+	public void testInfeasiblePathAStar() {
+		assertEquals(AbstractSolution.Status.INFEASIBLE,infeasibleAStar.getStatus());
+	}
+	
+	
+	// Tests ONE NODE //
 	@Test
 	public void testOneNodeDijkstra_Length() {
 		// Road map
@@ -153,10 +221,33 @@ public class ShortestPathTest {
 	}
 	
 	@Test
-	public void testRandomDijkstra() {
-		for(int i=0; i<50; i++) {
-			
+	public void testOneNodeAStar_Length() {
+		// Road map
+		assertEquals(onenodePathHG.getLength(),onenodeAStarHG.getPath().getLength(),1e-6);
+		assertTrue(onenodeAStarHG.getPath().isValid());
+		
+		//Non road map
+		assertEquals(onenodePathC.getLength(),onenodeAStarC.getPath().getLength(),1e-6);
+		assertTrue(onenodeAStarC.getPath().isValid());
+	}
+	
+	
+	// Tests RANDOM //
+	@Test
+	public void testRandomDijkstra_Length() {
+		for(int i=0; i<5; i++) {
+			assertEquals(Bellmansolutions[i].getPath().getLength(),Dijkstrasolutions[i].getPath().getLength(),1000);
+			assertTrue(Dijkstrasolutions[i].getPath().isValid());
 		}
 	}
+	
+	@Test
+	public void testRandomAStar_Length() {
+		for(int i=0; i<5; i++) {
+			assertEquals(Bellmansolutions[i].getPath().getLength(),AStarsolutions[i].getPath().getLength(),1000);
+			assertTrue(AStarsolutions[i].getPath().isValid());
+		}
+	}
+	
 	
 }
