@@ -21,7 +21,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
     Label[] label = new Label[data.getGraph().size()];
     public void setLabel(ShortestPathData data){
     	for (int i=0; i<data.getGraph().size(); i++) {
-    		label[i]=new Label(i,false,Double.POSITIVE_INFINITY,-1);
+    		label[i]=new Label(data.getGraph().get(i),false,Double.POSITIVE_INFINITY,-1);
     	}
     }
 
@@ -75,13 +75,13 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         	}
         	
            	//Mark
-        	label[currentNode.getIDCurrentNode()].setMarque(true);
+        	label[currentNode.getCurrentNode().getId()].setMarque(true);
         	
         	//System.out.println("Coût :"+label[currentNode.getIDCurrentNode()].getCost());
         	
         	//int successorswatch =0;
         	
-        	for(Arc successor : graph.get(currentNode.getIDCurrentNode()).getSuccessors()) {
+        	for(Arc successor : graph.get(currentNode.getCurrentNode().getId()).getSuccessors()) {
         		
         		//successorswatch +=1;
         		
@@ -93,9 +93,9 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         		int IdNextNode = successor.getDestination().getId();
         		//If successor not marked
         		if(!label[IdNextNode].getMarque()) {
-        			double w = data.getCost(successor);
-        			double oldCost = label[IdNextNode].getCost();
-        			double newCost = label[currentNode.getIDCurrentNode()].getCost()+w;
+        			double w = data.getCost(successor)+label[IdNextNode].getExpected();
+        			double oldCost = label[IdNextNode].getTotalCost();
+        			double newCost = label[currentNode.getCurrentNode().getId()].getCost()+w;
         			
         			//Notify all observers that a node has been reached for the first time.
         			if(Double.isInfinite(oldCost) && Double.isFinite(newCost)) {
@@ -105,8 +105,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         		//Test if the new cost is smaller than the old cost.
         		//If so, the cost of the successor is updated
         			if(oldCost>newCost) {
-        				label[IdNextNode].setCost(newCost);
-        				label[IdNextNode].setFather(currentNode.getIDCurrentNode());
+        				label[IdNextNode].setCost(label[successor.getOrigin().getId()].getCost()+data.getCost(successor));
+        				label[IdNextNode].setFather(currentNode.getCurrentNode().getId());
         				
         				//remove it from the heap if already exists
         				//if not, insert it

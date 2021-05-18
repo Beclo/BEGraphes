@@ -1,13 +1,15 @@
 package org.insa.graphs.algorithm.shortestpath;
 
+import org.insa.graphs.model.*;
+
 public class Label implements Comparable<Label>{
 	
-	int currentnode;
+	Node currentnode;
 	boolean marque;
 	double cost;
 	int father;
 	
-	public Label(int currentnode, boolean marque, double cost, int father) {
+	public Label(Node currentnode, boolean marque, double cost, int father) {
 		this.currentnode=currentnode;
 		this.marque=marque;
 		this.cost=cost;
@@ -23,7 +25,7 @@ public class Label implements Comparable<Label>{
 		return this.marque;
 	}
 	
-	public int getIDCurrentNode() {
+	public Node getCurrentNode() {
 		return this.currentnode;
 	}
 	
@@ -33,6 +35,10 @@ public class Label implements Comparable<Label>{
 	
 	public double getTotalCost() {
 		return this.cost;
+	}
+	
+	public double getExpected() {
+		return 0;
 	}
 	
 	//Setter
