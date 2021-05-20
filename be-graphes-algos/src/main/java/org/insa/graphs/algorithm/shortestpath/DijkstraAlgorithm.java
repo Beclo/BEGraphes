@@ -77,7 +77,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
            	//Mark
         	label[currentNode.getCurrentNode().getId()].setMarque(true);
         	
-        	//System.out.println("Coût :"+label[currentNode.getIDCurrentNode()].getCost());
+        	//System.out.println("Coût :"+label[currentNode.getCurrentNode().getId()].getTotalCost());
         	
         	//int successorswatch =0;
         	
