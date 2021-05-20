@@ -16,7 +16,9 @@ import org.insa.graphs.model.Graph;
 import org.insa.graphs.model.Node;
 import org.insa.graphs.model.Path;
 import org.insa.graphs.model.io.BinaryGraphReader;
+import org.insa.graphs.model.io.BinaryPathReader;
 import org.insa.graphs.model.io.GraphReader;
+import org.insa.graphs.model.io.PathReader;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -34,11 +36,11 @@ public class ShortestPathTest {
     private static ArrayList<Node> nodesHauteGaronne,nodesCarre;
     
     // Paths use for tests
-    private static Path onenodePathHG, onenodePathC;
+    private static Path onenodePathHG, onenodePathC, longPath, longPathTime;
     
     // Variables to construct solutions for the tests
-    private static ShortestPathSolution infeasibleDijkstra, onenode0DijkstraHG, onenode0DijkstraC, onenode2DijkstraHG, onenode2DijkstraC, triang0DijkstraHG;
-    private static ShortestPathSolution infeasibleAStar, onenode0AStarHG, onenode0AStarC, onenode2AStarHG, onenode2AStarC, triang0AStarHG;
+    private static ShortestPathSolution infeasibleDijkstra, onenode0DijkstraHG, onenode0DijkstraC, onenode2DijkstraHG, onenode2DijkstraC, longpath0Dijkstra, longpath2Dijkstra, triangODDijkstra, triangOSDijkstra, triangSDDijkstra;
+    private static ShortestPathSolution infeasibleAStar, onenode0AStarHG, onenode0AStarC, onenode2AStarHG, onenode2AStarC, longpath0AStar, longpath2AStar, triangODAStar, triangOSAStar, triangSDAStar;
     
     // Array of solutions
     private static ShortestPathSolution[] Dijkstrasolutions0,Dijkstrasolutions2;
@@ -61,6 +63,20 @@ public class ShortestPathTest {
 			GraphReader readerCarre = new BinaryGraphReader(new DataInputStream(new BufferedInputStream(new FileInputStream(mapCarre))));
 			graphCarre = readerCarre.read();
 		}catch(Exception e) {}
+		
+		// Get Insa-Bikini path (long path)
+		try {
+			String pathInsa = "/home/berthele/Bureau/BEGraphes/path_fr31_insa_bikini_canal.path";
+			PathReader readerInsa = new BinaryPathReader(new DataInputStream(new BufferedInputStream(new FileInputStream(pathInsa))));
+			longPath = readerInsa.readPath(graphHauteGaronne);
+		}catch(Exception e) {}
+		
+		// Get Insa-Aeroport path time (long path)
+				try {
+					String pathAero = "/home/berthele/Bureau/BEGraphes/path_fr31_insa_aeroport_time.path";
+					PathReader readerAero = new BinaryPathReader(new DataInputStream(new BufferedInputStream(new FileInputStream(pathAero))));
+					longPathTime = readerAero.readPath(graphHauteGaronne);
+				}catch(Exception e) {}
 		
 		
 		// Get Nodes of Haute-Garonne map
@@ -105,7 +121,6 @@ public class ShortestPathTest {
 					if(origin.equals(components.get(i).get(j))) {
 						originOK=true;
 						numcomponent = i;
-						System.out.println("Origine :"+origin.getId());
 					}
 				}
 			}
@@ -114,7 +129,6 @@ public class ShortestPathTest {
 				for(int j=0;j<components.get(numcomponent).size();j++) {
 					if(destination.equals(components.get(numcomponent).get(j))) {
 						destinationOK=false;
-						System.out.println("Destination :"+destination.getId());
 					}
 				}
 			}
@@ -245,14 +259,70 @@ public class ShortestPathTest {
 		////////// LONG path //////////
 		//////////////////////////////
 		
+		//// Construction of the long path solution
+				//Road map Haute-Garonne
+					// Path Insa-Bikini (Length)
+		ShortestPathData longpath0Data = new ShortestPathData(graphHauteGaronne,longPath.getOrigin(),longPath.getDestination(),ArcInspectorFactory.getAllFilters().get(0));
+					// Path Insa-Aeroport (Time)
+		ShortestPathData longpath2Data = new ShortestPathData(graphHauteGaronne,longPathTime.getOrigin(),longPathTime.getDestination(),ArcInspectorFactory.getAllFilters().get(2));
+		
+		//// Dijkstra ////
+			// Mode Length
+		DijkstraAlgorithm longpath0DijkstraAlgo = new DijkstraAlgorithm(longpath0Data);
+		longpath0Dijkstra = longpath0DijkstraAlgo.doRun();
+			
+			// Mode Time
+		DijkstraAlgorithm longpath2DijkstraAlgo = new DijkstraAlgorithm(longpath2Data);
+		longpath2Dijkstra = longpath2DijkstraAlgo.doRun();
+				
+		//// A* ////
+			// Mode Length
+		AStarAlgorithm longpath0AStarAlgo = new AStarAlgorithm(longpath0Data);
+		longpath0AStar = longpath0AStarAlgo.doRun();
+		
+			// Mode Time
+		AStarAlgorithm longpath2AStarAlgo = new AStarAlgorithm(longpath2Data);
+		longpath2AStar = longpath2AStarAlgo.doRun();
 		
 		
 		///////////////////////////////////////////
 		////////// TRIANGULAR INEQUALITY //////////
 		//////////////////////////////////////////
 		
+		// Random Nodes
 		
+		Node origine = nodesHauteGaronne.get(randomnodes.nextInt(graphHauteGaronne.size())); // Point O
+		Node dest = nodesHauteGaronne.get(randomnodes.nextInt(graphHauteGaronne.size())); // Point D
+		Node stop = nodesHauteGaronne.get(randomnodes.nextInt(graphHauteGaronne.size())); // Point S
 		
+		//// Construction of the long path solution
+			// Road map Haute-Garonne
+		ShortestPathData ODData = new ShortestPathData(graphHauteGaronne,origine,dest,ArcInspectorFactory.getAllFilters().get(0));
+		ShortestPathData OSData = new ShortestPathData(graphHauteGaronne,origine,stop,ArcInspectorFactory.getAllFilters().get(0));
+		ShortestPathData SDData = new ShortestPathData(graphHauteGaronne,stop,dest,ArcInspectorFactory.getAllFilters().get(0));
+		
+		//// Dijkstra ////
+			// Mode Length
+		DijkstraAlgorithm ODDijkstraAlgo = new DijkstraAlgorithm(ODData);
+		triangODDijkstra = ODDijkstraAlgo.doRun();
+		
+		DijkstraAlgorithm OSDijkstraAlgo = new DijkstraAlgorithm(OSData);
+		triangOSDijkstra = OSDijkstraAlgo.doRun();
+		
+		DijkstraAlgorithm SDDijkstraAlgo = new DijkstraAlgorithm(SDData);
+		triangSDDijkstra = SDDijkstraAlgo.doRun();
+	
+		//// A* ////
+			// Mode Length
+		AStarAlgorithm ODAStarAlgo = new AStarAlgorithm(ODData);
+		triangODAStar = ODAStarAlgo.doRun();
+		
+		AStarAlgorithm OSAStarAlgo = new AStarAlgorithm(OSData);
+		triangOSAStar = OSAStarAlgo.doRun();
+		
+		AStarAlgorithm SDAStarAlgo = new AStarAlgorithm(SDData);
+		triangSDAStar = SDAStarAlgo.doRun();
+
 	}
 	
 	///////////////////////
@@ -293,11 +363,11 @@ public class ShortestPathTest {
 	@Test
 	public void testOneNodeDijkstra_Time() {
 		// Road map
-		assertEquals(onenodePathHG.getMinimumTravelTime(),onenode2DijkstraHG.getPath().getLength(),1e-6);
+		assertEquals(onenodePathHG.getMinimumTravelTime(),onenode2DijkstraHG.getPath().getMinimumTravelTime(),1e-6);
 		assertTrue(onenode2DijkstraHG.getPath().isValid());
 		
 		//Non road map
-		assertEquals(onenodePathC.getMinimumTravelTime(),onenode2DijkstraC.getPath().getLength(),1e-6);
+		assertEquals(onenodePathC.getMinimumTravelTime(),onenode2DijkstraC.getPath().getMinimumTravelTime(),1e-6);
 		assertTrue(onenode2DijkstraC.getPath().isValid());
 	}
 	
@@ -318,11 +388,11 @@ public class ShortestPathTest {
 	@Test
 	public void testOneNodeAStar_Time() {
 		// Road map
-		assertEquals(onenodePathHG.getMinimumTravelTime(),onenode2AStarHG.getPath().getLength(),1e-6);
+		assertEquals(onenodePathHG.getMinimumTravelTime(),onenode2AStarHG.getPath().getMinimumTravelTime(),1e-6);
 		assertTrue(onenode2AStarHG.getPath().isValid());
 		
 		//Non road map
-		assertEquals(onenodePathC.getMinimumTravelTime(),onenode2AStarC.getPath().getLength(),1e-6);
+		assertEquals(onenodePathC.getMinimumTravelTime(),onenode2AStarC.getPath().getMinimumTravelTime(),1e-6);
 		assertTrue(onenode2AStarC.getPath().isValid());
 	}
 	
@@ -344,7 +414,7 @@ public class ShortestPathTest {
 	@Test
 	public void testRandomDijkstra_Time() {
 		for(int i=0; i<50; i++) {
-			assertEquals(Bellmansolutions2[i].getPath().getLength(),Dijkstrasolutions2[i].getPath().getLength(),100);
+			assertEquals(Bellmansolutions2[i].getPath().getMinimumTravelTime(),Dijkstrasolutions2[i].getPath().getMinimumTravelTime(),100);
 			assertTrue(Dijkstrasolutions2[i].getPath().isValid());
 		}
 	}
@@ -363,10 +433,62 @@ public class ShortestPathTest {
 	@Test
 	public void testRandomAStar_Time() {
 		for(int i=0; i<50; i++) {
-			assertEquals(Bellmansolutions2[i].getPath().getLength(),AStarsolutions2[i].getPath().getLength(),100);
+			assertEquals(Bellmansolutions2[i].getPath().getMinimumTravelTime(),AStarsolutions2[i].getPath().getMinimumTravelTime(),100);
 			assertTrue(AStarsolutions2[i].getPath().isValid());
 		}
 	}
 	
+	/////////////////////
+	// Tests LONG PATH //
+	////////////////////
 	
+	//----------//
+	// DIJKSTRA //
+	//---------//
+	@Test
+	public void testLongPathDijkstra_Length() {
+		assertEquals(longPath.getLength(),longpath0Dijkstra.getPath().getLength(),100);
+		assertTrue(longpath0Dijkstra.getPath().isValid());
+	}
+	
+	@Test
+	public void testLongPathDijkstra_Time() {
+		assertEquals(longPathTime.getMinimumTravelTime(),longpath2Dijkstra.getPath().getMinimumTravelTime(),100);
+		assertTrue(longpath2Dijkstra.getPath().isValid());
+	}
+	
+	//-------//
+	// ASTAR //
+	//------//
+	@Test
+	public void testLongPathAStar_Length() {
+		assertEquals(longPath.getLength(),longpath0AStar.getPath().getLength(),100);
+		assertTrue(longpath0AStar.getPath().isValid());
+	}
+	
+	@Test
+	public void testLongPathAStar_Time() {
+		assertEquals(longPathTime.getMinimumTravelTime(),longpath2AStar.getPath().getMinimumTravelTime(),100);
+		assertTrue(longpath2AStar.getPath().isValid());
+	}
+	
+	/////////////////////////////////
+	// Tests TRIANGULAR INEQUALITY //
+	////////////////////////////////
+	
+	//----------//
+	// DIJKSTRA //
+	//---------//
+	@Test
+	public void testtriangPathDijkstra_Length() {
+		assertTrue(triangODDijkstra.getPath().getLength()<=(triangOSDijkstra.getPath().getLength()+triangSDDijkstra.getPath().getLength()));
+	}
+	
+	//-------//
+	// ASTAR //
+	//------//
+	@Test
+	public void testtriangPathAStar_Length() {
+		assertTrue(triangODAStar.getPath().getLength()<=(triangOSAStar.getPath().getLength()+triangSDAStar.getPath().getLength()));
+	}
 }
